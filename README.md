@@ -1,117 +1,18 @@
-# Movie Ticket Booking System — Builder Pattern
+**3. Clean Code Requirements (Justification of 5 Principles for the Bridge Pattern)**
 
-## Product Description
-This project implements the Builder Creational Design Pattern in Java for a
-Cinema Booking System. The system allows flexible, step-by-step construction
-of complex `com.aitu.moviebuilder.MovieTicket` objects. A movie ticket requires several parameters
-such as movie title, hall number, show time, seat type, and optional
-additions like popcorn and drinks. Using the Builder pattern separates the
-construction process from the final representation.
+**1. Clear separation of abstraction-side vs. implementation-side responsibilities:**
+The responsibilities are strictly separated. The `Notification` hierarchy (abstraction) is responsible solely for the business logic and formatting the message content (what to send). Meanwhile, the `MessageSender` interface and its implementations are responsible exclusively for the technical delivery mechanism (how to send). No implementor details leak to the client or the abstraction side.
 
-## Pattern Components
-| Component | Class | Role |
-|---|---|---|
-| Product | `com.aitu.moviebuilder.MovieTicket` | The complex object being built. |
-| Builder | `com.aitu.moviebuilder.TicketBuilder` (interface) + `com.aitu.moviebuilder.StandardTicketBuilder` (impl) | Fluent, chainable step-by-step construction with validation in `build()`. |
-| Director | `com.aitu.moviebuilder.TicketDirector` | Known, reusable construction recipe (`constructVIPPackage`). |
-| Client | `com.aitu.moviebuilder.Main` | Demonstrates director-built ticket, manual custom build, and validation failure. |
+**2. Meaningful names distinguishing Abstraction vs. Implementor roles:**
+Class names clearly reflect their roles in the Bridge pattern. Names like `MessageSender`, `EmailSender`, and `TelegramSender` clearly indicate their implementor role (message delivery). Names like `Notification`, `BookingConfirmation`, and `PromoAlert` reflect the business entities on the abstraction side.
 
-## Clean Code Principles Applied
+**3. Small, focused classes on both sides of the bridge:**
+The Single Responsibility Principle is maintained. Each class performs exactly one task. For example, `EmailSender` only simulates sending an email and consists of just a single, short `sendMessage()` method.
 
-### 1. Meaningful and Intention-Revealing Names
-Class, interface, and method names clearly express their domain purpose
-without needing extra comments.
+**4. No duplicated logic between Concrete Implementors:**
+There is no duplicated code between the concrete implementors (`EmailSender` and `TelegramSender`). Each class contains only the unique logic for its specific communication channel. The base logic of storing the reference to the sender is extracted into the abstract parent class `Notification`, which prevents constructor duplication in its subclasses.
 
-```java
-import com.aitu.moviebuilder.MovieTicket;
-import com.aitu.moviebuilder.TicketBuilder;
+**5. Backward-compatible design (Open-Closed Principle):**
+The architecture is open for extension but closed for modification. If a new communication method needs to be added in the future (e.g., an `SmsSender`), we only need to create one new concrete implementor class. Adding this new implementor requires no changes to the `Notification` abstraction or its existing subclasses.
 
-public MovieTicket constructVIPPackage(TicketBuilder builder, String movieTitle) {
-    // clear, domain-specific method name — no comment needed to explain what it does
-}
-```
-
-### 2. Small Methods, Each Doing One Thing
-Every setter in `com.aitu.moviebuilder.StandardTicketBuilder` assigns exactly one field and
-returns `this`; no setter does more than its name promises.
-
-```java
-import com.aitu.moviebuilder.TicketBuilder;
-
-@Override
-public TicketBuilder setSeatType(String seat) {
-    this.seatType = seat;
-    return this;
-}
-```
-
-### 3. Consistent Formatting and Small, Focused Classes
-Responsibilities are split across small classes instead of one large class:
-`com.aitu.moviebuilder.MovieTicket` only holds data, `com.aitu.moviebuilder.StandardTicketBuilder` only builds,
-`com.aitu.moviebuilder.TicketDirector` only orchestrates known recipes. Formatting (field
-ordering, `@Override` usage, brace style) is uniform across all classes.
-
-### 4. Validated Construction
-`build()` throws a clear, descriptive exception instead of returning an
-incomplete ticket.
-```java
-// Before: would silently create a ticket with movieTitle == null
-return new com.aitu.moviebuilder.MovieTicket(movieTitle, hallNumber, showTime, seatType, includePopcorn, includeDrink);
-
-// After: fails fast with a specific message
-if (movieTitle == null || movieTitle.isEmpty()) {
-    throw new IllegalStateException("Movie title cannot be empty!");
-}
-return new com.aitu.moviebuilder.MovieTicket(movieTitle, hallNumber, showTime, seatType, includePopcorn, includeDrink);
-```
-
-### 5. No Magic Numbers/Strings
-The default seat type used to be a raw string literal assigned directly to
-the field. It is now a named constant with one place to change it.
-```java
-// Before
-private String seatType = "Standard";
-
-// After
-private static final String DEFAULT_SEAT_TYPE = "Standard";
-private String seatType = DEFAULT_SEAT_TYPE;
-```
-
-## How to Run
-```bash
-javac src/*.java -d out
-java -cp out com.aitu.moviebuilder.Main
-```
-Clean Code Requirements (Justification of 5 Principles)
-
-1. Meaningful, intention-revealing names:
-The names of classes and interfaces in the project clearly reflect their purpose (OnlineBookingFactory, CardPayment, TicketFactory). Method names, such as pay(double amount), immediately indicate what they do without requiring any additional comments.
-
-2. Small methods, each doing one thing:
-Factory methods (e.g., createTicket() or createPayment()) consist of just a single line of code. Their only responsibility is to instantiate a specific object and return it.
-
-3. Validated construction:
-In the ticket constructors (StandardTicket and VIPTicket), the state is validated to prevent the creation of an object with invalid data (such as an empty movie title).
-Code example (Before/After):
-Before: this.movieName = movieName;
-After:
-
-Java
-
-if (movieName == null || movieName.trim().isEmpty()) {
-    throw new IllegalArgumentException("Movie title is required");
-}
-
-4. No magic numbers:
-Ticket prices are not hardcoded as arbitrary numbers directly within the methods; instead, they are extracted into clear, readable constants.
-Code example (Before/After):
-Before: return 1500.0;
-After:
-
-Java
-
-private static final double BASE_PRICE = 1500.0;
-return BASE_PRICE;
-
-5. Consistent formatting and small, focused classes:
-The Single Responsibility Principle is applied throughout the project. The logic for card payments is completely isolated in the CardPayment class, while the logic for issuing a physical ticket is isolated in PaperDelivery. The classes are compact and do not exceed 15-20 lines of code.
+---
