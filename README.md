@@ -82,3 +82,36 @@ private String seatType = DEFAULT_SEAT_TYPE;
 javac src/*.java -d out
 java -cp out com.aitu.moviebuilder.Main
 ```
+Clean Code Requirements (Justification of 5 Principles)
+
+1. Meaningful, intention-revealing names:
+The names of classes and interfaces in the project clearly reflect their purpose (OnlineBookingFactory, CardPayment, TicketFactory). Method names, such as pay(double amount), immediately indicate what they do without requiring any additional comments.
+
+2. Small methods, each doing one thing:
+Factory methods (e.g., createTicket() or createPayment()) consist of just a single line of code. Their only responsibility is to instantiate a specific object and return it.
+
+3. Validated construction:
+In the ticket constructors (StandardTicket and VIPTicket), the state is validated to prevent the creation of an object with invalid data (such as an empty movie title).
+Code example (Before/After):
+Before: this.movieName = movieName;
+After:
+
+Java
+
+if (movieName == null || movieName.trim().isEmpty()) {
+    throw new IllegalArgumentException("Movie title is required");
+}
+
+4. No magic numbers:
+Ticket prices are not hardcoded as arbitrary numbers directly within the methods; instead, they are extracted into clear, readable constants.
+Code example (Before/After):
+Before: return 1500.0;
+After:
+
+Java
+
+private static final double BASE_PRICE = 1500.0;
+return BASE_PRICE;
+
+5. Consistent formatting and small, focused classes:
+The Single Responsibility Principle is applied throughout the project. The logic for card payments is completely isolated in the CardPayment class, while the logic for issuing a physical ticket is isolated in PaperDelivery. The classes are compact and do not exceed 15-20 lines of code.
