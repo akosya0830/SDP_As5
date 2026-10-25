@@ -1,5 +1,6 @@
 import aitu.factorymethod.*;
 import abstractfactory.*;
+import strategy.*;
 
 public class MainClient {
     public static void main(String[] args) {
@@ -15,7 +16,6 @@ public class MainClient {
         // --- Часть B: Abstract Factory ---
         System.out.println("\n--- ОФОРМЛЕНИЕ ЗАКАЗА (ABSTRACT FACTORY) ---");
 
-        // Сценарий 1: Клиент покупает стандартный билет онлайн
         System.out.println(">> Сценарий: Онлайн-покупка");
         BookingFactory onlineExperience = new OnlineBookingFactory();
         Payment onlinePayment = onlineExperience.createPayment();
@@ -24,7 +24,6 @@ public class MainClient {
         onlinePayment.pay(standardTicket.getPrice());
         onlineDelivery.deliver();
 
-        // Сценарий 2: Клиент покупает VIP-билет на кассе (оффлайн)
         System.out.println("\n>> Сценарий: Покупка на кассе");
         BookingFactory offlineExperience = new OfflineBookingFactory();
         Payment offlinePayment = offlineExperience.createPayment();
@@ -32,5 +31,27 @@ public class MainClient {
 
         offlinePayment.pay(vipTicket.getPrice());
         offlineDelivery.deliver();
-    }
+
+// --- Часть C: Strategy Pattern ---
+        System.out.println("\n--- ДИНАМИЧЕСКОЕ ЦЕНООБРАЗОВАНИЕ (STRATEGY) ---");
+
+// 1. Клиент выбирает фильм "Интерстеллар" по базовой цене 3000 тг.
+        System.out.println(">> Обычный расчет цены:");
+    TicketOrder myOrder = new TicketOrder("Интерстеллар", 3000.0, new StandardPricingStrategy());
+        myOrder.printOrderDetails();
+
+// 2. Клиент показывает студенческий билет. Меняем поведение на лету!
+        System.out.println(">> Применена скидка студента:");
+        myOrder.setPricingStrategy(new
+
+    StudentDiscountStrategy());
+        myOrder.printOrderDetails();
+
+// 3. Клиент решает проапгрейдить билет до VIP-зала. Снова меняем поведение.
+        System.out.println(">> Апгрейд до VIP-зала:");
+        myOrder.setPricingStrategy(new
+
+    VipPremiumStrategy());
+        myOrder.printOrderDetails();
+}
 }
